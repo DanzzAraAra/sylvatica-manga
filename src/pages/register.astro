@@ -3,8 +3,12 @@ import Layout from '../Layouts/Layout.astro';
 ---
 
 <Layout title="Register">
-  <div class="min-h-screen flex items-center justify-center bg-[#111]">
-    <div class="w-full max-w-md p-8 bg-[#1a1b26] rounded-2xl shadow-2xl border border-white/10 relative overflow-hidden">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-[#111] to-[#1a1b26]">
+    
+    <div class="absolute top-1/4 right-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 left-1/4 w-72 h-72 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="w-full max-w-md p-8 bg-[#1a1b26]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 relative z-10 overflow-hidden">
       
       <div id="register-form" class="transition-all duration-500">
         <h1 class="text-3xl font-bold text-white mb-2 text-center">Create Account</h1>
@@ -13,15 +17,15 @@ import Layout from '../Layouts/Layout.astro';
         <form id="form-reg" class="space-y-5">
           <div>
             <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
-            <input type="email" name="email" required class="w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
+            <input type="email" name="email" required class="w-full bg-[#111]/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-400 mb-2">Password</label>
-            <input type="password" name="password" required class="w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition" placeholder="Min. 8 characters">
+            <input type="password" name="password" required class="w-full bg-[#111]/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition" placeholder="Min. 8 characters">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-400 mb-2">Confirm Password</label>
-            <input type="password" name="confirm_password" required class="w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition" placeholder="Re-type password">
+            <input type="password" name="confirm_password" required class="w-full bg-[#111]/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition" placeholder="Re-type password">
           </div>
           
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-blue-600/20 mt-2">
@@ -41,7 +45,7 @@ import Layout from '../Layouts/Layout.astro';
           <input type="hidden" id="hidden-email" name="email">
           <div>
             <label class="block text-sm font-medium text-gray-400 mb-2">OTP Code</label>
-            <input type="text" name="otp" required placeholder="123456" class="w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-white text-center text-2xl tracking-widest focus:outline-none focus:border-green-500 transition">
+            <input type="text" name="otp" required placeholder="123456" class="w-full bg-[#111]/50 border border-white/10 rounded-lg px-4 py-3 text-white text-center text-2xl tracking-widest focus:outline-none focus:border-green-500 transition">
           </div>
           
           <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-green-600/20">
@@ -99,7 +103,6 @@ import Layout from '../Layouts/Layout.astro';
       const formData = new FormData(regForm);
       const data = Object.fromEntries(formData);
       
-      // VALIDASI PASSWORD
       if (data.password.length < 8) {
         showToast('Weak Password', 'Minimum 8 characters required');
         return;
@@ -121,7 +124,7 @@ import Layout from '../Layouts/Layout.astro';
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             email: data.email,
-            password: data.password // Kita hanya kirim password asli ke server
+            password: data.password 
         }),
       });
 
