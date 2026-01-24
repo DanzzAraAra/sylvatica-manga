@@ -1,0 +1,63 @@
+---
+import Layout from '../../Layouts/Layout.astro';
+
+const { id } = Astro.params;
+let images = [];
+let chapterInfo = null;
+
+try {
+    const res = await fetch(`https://api.mangadex.org/at-home/server/${id}`);
+    const data = await res.json();
+
+    if(data.chapter && data.baseUrl) {
+        const { hash, data: files } = data.chapter;
+        images = files.map(file => `${data.baseUrl}/data/${hash}/${file}`);
+    }
+
+    const infoRes = await fetch(`https://api.mangadex.org/chapter/${id}`);
+    const infoData = await infoRes.json();
+    chapterInfo = infoData.data;
+
+} catch (e) {
+    console.error("Error fetching chapter pages", e);
+}
+---
+
+<Layout title={chapterInfo ? `Ch. ${chapterInfo.attributes.chapter}` : "Reading..."}>
+    
+    <div class="fixed top-0 left-0 w-full bg-[#1a1b26]/90 backdrop-blur-xl border-b border-white/10 z-50 px-4 py-3 flex items-center justify-between shadow-lg">
+        <a href="javascript:history.back()" class="flex items-center gap-2 text-white/80 hover:text-blue-400 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <span class="text-sm font-bold">Back</span>
+        </a>
+        <div class="text-center">
+            <h2 class="text-white font-bold text-sm">Chapter {chapterInfo?.attributes.chapter || "-"}</h2>
+        </div>
+        <div class="w-10"></div>
+    </div>
+
+    <div class="pt-16 pb-32 min-h-screen bg-[#111] flex flex-col items-center">
+        {images.length > 0 ? (
+            images.map((img, index) => (
+                <img 
+                    src={img} 
+                    loading="lazy" 
+                    class="w-full max-w-2xl h-auto shadow-2xl mb-1 bg-[#1a1b26] min-h-[300px]" 
+                    alt={`Page ${index + 1}`}
+                />
+            ))
+        ) : (
+            <div class="text-center mt-20 text-white/50">
+                <p>Failed to load images.</p>
+                <a href={`/read/${id}`} class="text-blue-400 underline mt-2 inline-block">Reload</a>
+            </div>
+        )}
+
+        <div class="mt-10 mb-10 flex gap-4">
+             <button onclick="alert('Use Chapter List to navigate')" class="px-6 py-3 bg-blue-600 rounded-full text-white font-bold shadow-lg hover:bg-blue-500 transition">
+                Next Chapter
+             </button>
+        </div>
+    </div>
+
+</Layout>
