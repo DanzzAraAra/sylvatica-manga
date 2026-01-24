@@ -1,5 +1,5 @@
 ---
-import Layout from '../../Layouts/Layout.astro';
+import Layout from '../../layouts/Layout.astro';
 
 const { id } = Astro.params;
 let mangaData = null;
@@ -65,9 +65,8 @@ if (!mangaData) return Astro.redirect('/404');
         </div>
 
         <div class="px-2">
-            <h3 class="text-lg font-bold text-purple-200 mb-4 flex items-center justify-between">
-                <span>Chapters</span>
-                <span class="text-xs bg-white/10 px-2 py-1 rounded text-white/50">Source: MangaDex</span>
+            <h3 class="text-lg font-bold text-purple-200 mb-4">
+                Chapters
             </h3>
 
             {mangaDexError ? (
