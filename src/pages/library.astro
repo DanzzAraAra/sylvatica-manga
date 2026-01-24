@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Library - Sylvatica">
+    <h2 class="text-xl font-bold text-blue-100 mb-6 pl-3 border-l-2 border-blue-500">My Collection</h2>
+    
+    <div id="loading" class="text-center py-10">
+        <svg class="animate-spin h-6 w-6 text-blue-400 mx-auto" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    </div>
+    
+    <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        const grid = document.getElementById('grid');
+        const loading = document.getElementById('loading');
+
+        async function init() {
+            if(!userId) {
+                loading.innerHTML = "<a href='/login' class='text-blue-300 underline text-sm'>Login required</a>";
+                return;
+            }
+            try {
+                const res = await fetch(`/api/library/list?userId=${userId}`);
+                const data = await res.json();
+                loading.classList.add('hidden');
+                
+                if(data.length === 0) {
+                    grid.parentElement.innerHTML += "<p class='text-center text-white/40 text-sm'>Library is empty.</p>";
+                    return;
+                }
+
+                grid.classList.remove('hidden');
+                grid.innerHTML = data.map(m => `
+                    <a href="/manga/${m.mangaId}" class="block relative group overflow-hidden rounded-xl border border-white/5">
+                        <img src="${m.image}" class="w-full h-48 object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end p-3">
+                            <p class="text-xs font-bold text-white truncate w-full">${m.title}</p>
+                        </div>
+                    </a>
+                `).join('');
+            } catch(e) { loading.innerText = "Error loading library"; }
+        }
+        init();
+    </script>
+</Layout>

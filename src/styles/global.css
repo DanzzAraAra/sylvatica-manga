@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #7693E0;
+    --primary-purple: #B69EE1;
+}
+
+body { 
+    font-family: 'Outfit', sans-serif; 
+    background: radial-gradient(circle at top, #2b2d42 0%, #1a1b26 100%);
+    color: white;
+}
+
+.glass-panel {
+    background: rgba(40, 45, 80, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(118, 147, 224, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.input-field input {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(118,147,224,0.3);
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+}
+.input-field input:focus {
+    border-color: #7693E0;
+}

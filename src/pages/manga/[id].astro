@@ -1,0 +1,243 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+let mangaData = null;
+
+try {
+    const res = await fetch(`https://api.jikan.moe/v4/manga/${id}`);
+    const json = await res.json();
+    mangaData = json.data;
+} catch (e) {
+    return Astro.redirect('/404');
+}
+
+if (!mangaData) return Astro.redirect('/404');
+---
+
+<Layout title={mangaData.title}>
+    <div class="pb-20">
+        <div class="glass-panel p-5 rounded-2xl mb-6 flex gap-4 items-start relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+            
+            <img src={mangaData.images.webp.image_url} alt={mangaData.title} class="w-28 h-40 object-cover rounded-lg shadow-xl z-10 border border-white/10">
+            
+            <div class="flex-1 z-10 py-1">
+                <h1 class="text-lg font-bold text-blue-50 leading-tight mb-1">{mangaData.title}</h1>
+                <p class="text-blue-200/50 text-xs mb-3">{mangaData.title_japanese}</p>
+                
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <span class="px-2 py-0.5 bg-white/5 rounded text-[10px] border border-white/10">{mangaData.status}</span>
+                    <span class="px-2 py-0.5 bg-white/5 rounded text-[10px] border border-white/10">{mangaData.score} ★</span>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="btnFavorite" class="flex-1 flex items-center justify-center gap-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-100 border border-blue-500/30 px-3 py-2 rounded-lg text-xs font-semibold transition">
+                        <svg id="favIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+                        <span id="favText">Save</span>
+                    </button>
+                    
+                    <button id="btnShare" class="flex-1 flex items-center justify-center gap-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-100 border border-purple-500/30 px-3 py-2 rounded-lg text-xs font-semibold transition">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <span>Share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-blue-200 font-bold text-sm mb-2">Synopsis</h3>
+            <p class="text-white/60 text-xs leading-relaxed text-justify">{mangaData.synopsis}</p>
+        </div>
+
+        <div class="glass-panel p-5 rounded-xl">
+            <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+                <h3 class="text-blue-100 font-bold text-sm">Community Thoughts</h3>
+                <div class="flex gap-3">
+                    <button id="btnLike" class="group flex items-center gap-1.5 px-3 py-1.5 rounded-full transition bg-white/5 hover:bg-blue-500/20 border border-white/5">
+                        <svg class="w-3.5 h-3.5 text-white/50 group-hover:text-blue-400 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+                        <span id="countLike" class="text-[10px] text-white/70">0</span>
+                    </button>
+                    <button id="btnDislike" class="group flex items-center gap-1.5 px-3 py-1.5 rounded-full transition bg-white/5 hover:bg-red-500/20 border border-white/5">
+                        <svg class="w-3.5 h-3.5 text-white/50 group-hover:text-red-400 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg>
+                        <span id="countDislike" class="text-[10px] text-white/70">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <form id="commentForm" class="relative">
+                    <textarea 
+                        name="text" 
+                        id="commentInput"
+                        class="w-full bg-black/20 border border-blue-200/10 rounded-xl p-3 text-blue-100 placeholder-blue-200/20 focus:outline-none focus:border-blue-400/50 text-xs transition resize-none"
+                        rows="2"
+                        placeholder="Share your thoughts..."
+                        required
+                    ></textarea>
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold transition shadow-lg shadow-blue-900/50 uppercase tracking-wide">
+                            Post Comment
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="commentList" class="flex flex-col gap-4">
+                <div class="text-center py-4">
+                    <svg class="animate-spin h-5 w-5 text-blue-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .liked svg { stroke: #60a5fa; fill: rgba(96, 165, 250, 0.2); }
+    .disliked svg { stroke: #f87171; fill: rgba(248, 113, 113, 0.2); }
+    .favorited { background-color: rgba(118, 147, 224, 0.2) !important; border-color: #7693E0 !important; }
+    .favorited svg { fill: #7693E0; stroke: #7693E0; }
+</style>
+
+<script define:vars={{ mangaId: id, title: mangaData.title, image: mangaData.images.webp.image_url }}>
+    const userId = localStorage.getItem('userId');
+    const btnFavorite = document.getElementById('btnFavorite');
+    const btnShare = document.getElementById('btnShare');
+    const favText = document.getElementById('favText');
+    const btnLike = document.getElementById('btnLike');
+    const btnDislike = document.getElementById('btnDislike');
+    const countLike = document.getElementById('countLike');
+    const countDislike = document.getElementById('countDislike');
+    const commentList = document.getElementById('commentList');
+    const commentForm = document.getElementById('commentForm');
+    const commentInput = document.getElementById('commentInput');
+
+    function getRankTitle(level) {
+        if(level < 5) return "Novice Reader";
+        if(level < 10) return "Page Turner";
+        if(level < 20) return "Scroll Keeper";
+        return "Grand Librarian";
+    }
+
+    btnShare.addEventListener('click', async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: title,
+                    text: `Read ${title} on Sylvatica!`,
+                    url: window.location.href,
+                });
+            } catch (err) {}
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            const original = btnShare.innerHTML;
+            btnShare.innerHTML = `<span class="text-xs">Copied!</span>`;
+            setTimeout(() => btnShare.innerHTML = original, 2000);
+        }
+    });
+
+    async function checkFavorite() {
+        if(!userId) return;
+        try {
+            const res = await fetch(`/api/library/check?userId=${userId}&mangaId=${mangaId}`);
+            const data = await res.json();
+            if(data.isFavorite) setFavoriteUI(true);
+        } catch(e) {}
+    }
+
+    function setFavoriteUI(isFav) {
+        if(isFav) {
+            btnFavorite.classList.add('favorited');
+            favText.innerText = "Saved";
+        } else {
+            btnFavorite.classList.remove('favorited');
+            favText.innerText = "Save";
+        }
+    }
+
+    btnFavorite.addEventListener('click', async () => {
+        if(!userId) { window.location.href = '/login'; return; }
+        const isCurrentlyFav = btnFavorite.classList.contains('favorited');
+        setFavoriteUI(!isCurrentlyFav); 
+        try {
+            await fetch('/api/library/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, mangaId, title, image })
+            });
+        } catch(e) { setFavoriteUI(isCurrentlyFav); }
+    });
+
+    async function loadStats() {
+        try {
+            const res = await fetch(`/api/interaction/stats?mangaId=${mangaId}&userId=${userId || ''}`);
+            const data = await res.json();
+            countLike.innerText = data.likes;
+            countDislike.innerText = data.dislikes;
+            if (data.userReaction === 'like') btnLike.classList.add('liked');
+            if (data.userReaction === 'dislike') btnDislike.classList.add('disliked');
+        } catch (error) {}
+    }
+
+    async function handleReaction(action) {
+        if (!userId) { window.location.href = '/login'; return; }
+        try {
+            await fetch('/api/interaction/stats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mangaId, userId, action })
+            });
+            setTimeout(loadStats, 500); 
+        } catch (err) {}
+    }
+
+    async function loadComments() {
+        try {
+            const res = await fetch(`/api/interaction/comment?mangaId=${mangaId}`);
+            const comments = await res.json();
+            if (comments.length === 0) {
+                commentList.innerHTML = '<p class="text-blue-200/30 text-center text-xs italic">No thoughts yet. Be the first.</p>';
+                return;
+            }
+            commentList.innerHTML = comments.map(c => `
+                <div class="flex gap-3 items-start bg-white/5 p-3 rounded-lg border border-white/5">
+                    <img src="${c.userId?.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${c.userId?.username}`}" class="w-9 h-9 rounded-full bg-slate-800 object-cover border border-white/10">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-blue-100 font-bold text-xs">${c.userId?.username || 'User'}</span>
+                                <span class="text-blue-400/70 text-[9px] uppercase tracking-wide font-bold">${getRankTitle(c.userId?.level || 1)}</span>
+                            </div>
+                            <span class="text-white/20 text-[9px]">${new Date(c.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-blue-50/80 text-xs leading-relaxed mt-1">${c.text}</p>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {}
+    }
+
+    commentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!userId) { window.location.href = '/login'; return; }
+        const text = commentInput.value;
+        try {
+            const res = await fetch('/api/interaction/comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mangaId, userId, text })
+            });
+            if (res.ok) {
+                commentInput.value = "";
+                loadComments();
+            }
+        } catch (err) {}
+    });
+
+    btnLike.addEventListener('click', () => handleReaction('like'));
+    btnDislike.addEventListener('click', () => handleReaction('dislike'));
+
+    checkFavorite();
+    loadStats();
+    loadComments();
+</script>
