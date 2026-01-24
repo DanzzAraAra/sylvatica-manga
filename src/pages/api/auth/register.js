@@ -8,6 +8,10 @@ export const POST = async ({ request }) => {
     await dbConnect();
     const { email, password } = await request.json();
 
+    if (!password || password.length < 8) {
+      return new Response(JSON.stringify({ msg: "Password must be at least 8 characters" }), { status: 400 });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return new Response(JSON.stringify({ msg: "Email already registered" }), { status: 400 });
