@@ -1,54 +1,71 @@
 ---
 import Layout from '../Layouts/Layout.astro';
+import dbConnect from "../lib/db";
+import User from "../models/User";
+import jwt from "jsonwebtoken";
+
+// --- LOGIKA CEK USER LOGIN (Server Side) ---
+const token = Astro.cookies.get("token")?.value;
+let currentUser = null;
+
+if (!token) {
+  return Astro.redirect('/login'); // Kalau gak ada token, usir ke login
+}
+
+try {
+  // Verifikasi Token
+  const decoded = jwt.verify(token, import.meta.env.JWT_SECRET || "rahasia_negara_api");
+  
+  // Ambil data user dari DB
+  await dbConnect();
+  currentUser = await User.findById(decoded.userId).select("-password"); // Jangan ambil password
+
+  if (!currentUser) {
+    // Kalau token valid tapi user di DB udah dihapus
+    Astro.cookies.delete("token", { path: '/' });
+    return Astro.redirect('/login');
+  }
+
+} catch (error) {
+  // Kalau token palsu/expired
+  Astro.cookies.delete("token", { path: '/' });
+  return Astro.redirect('/login');
+}
+// -------------------------------------------
 ---
-<Layout title="Profile">
-    <div id="profileView" class="hidden max-w-sm mx-auto mt-4 text-center">
-        <div class="relative inline-block mb-4">
-            <img id="avatar" src="" class="w-24 h-24 rounded-full border-4 border-blue-500/30 object-cover bg-slate-800">
+
+<Layout title="My Profile">
+  <div class="min-h-screen bg-[#111] pt-24 px-4 pb-20">
+    <div class="max-w-2xl mx-auto">
+      
+      <div class="bg-[#1a1b26] rounded-2xl p-8 border border-white/10 shadow-2xl flex flex-col items-center text-center">
+        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-4 shadow-lg">
+          {currentUser.email.charAt(0).toUpperCase()}
         </div>
-        <h2 id="username" class="text-xl font-bold text-white mb-1">User</h2>
-        <p id="rank" class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-6">Novice</p>
-
-        <div class="glass-panel p-4 rounded-xl mb-4 text-left">
-             <div class="flex justify-between text-xs text-blue-200 mb-2">
-                 <span>Level <span id="lvl">1</span></span>
-                 <span id="xp">0 XP</span>
-             </div>
-             <div class="w-full bg-black/40 h-2 rounded-full overflow-hidden">
-                 <div id="bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-full w-0"></div>
-             </div>
-        </div>
-
-        <button id="logout" class="w-full bg-red-500/10 text-red-300 py-3 rounded-xl text-xs font-bold border border-red-500/20">Logout</button>
-    </div>
-
-    <script>
-        const userId = localStorage.getItem('userId');
         
-        if(!userId) {
-            window.location.href = '/login';
-        } else {
-            fetch(`/api/user/profile?userId=${userId}`)
-            .then(r => r.json())
-            .then(user => {
-                document.getElementById('profileView').classList.remove('hidden');
-                document.getElementById('username').innerText = user.username;
-                document.getElementById('avatar').src = user.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`;
-                document.getElementById('lvl').innerText = user.level;
-                document.getElementById('xp').innerText = `${user.exp % 100} / 100 XP`;
-                document.getElementById('bar').style.width = `${user.exp % 100}%`;
-                
-                let title = "Novice Reader";
-                if(user.level >= 5) title = "Page Turner";
-                if(user.level >= 10) title = "Scroll Keeper";
-                if(user.level >= 20) title = "Grand Librarian";
-                document.getElementById('rank').innerText = title;
-            });
-        }
+        <h1 class="text-2xl font-bold text-white mb-1">User Profile</h1>
+        <p class="text-gray-400 mb-6">{currentUser.email}</p>
 
-        document.getElementById('logout').addEventListener('click', () => {
-            localStorage.clear();
-            window.location.href = '/';
-        });
-    </script>
+        <div class="flex gap-4 w-full">
+            <button id="logout-btn" class="flex-1 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/50 py-3 rounded-xl font-bold transition">
+              Logout
+            </button>
+            <button class="flex-1 bg-white/5 hover:bg-white/10 text-white border border-white/10 py-3 rounded-xl font-bold transition">
+              Edit Profile
+            </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // LOGIKA LOGOUT
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      // Panggil API Logout (atau hapus cookie manual via client meski kurang bersih)
+      // Cara paling gampang di Astro client-side untuk logout:
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      window.location.href = "/login";
+    });
+  </script>
 </Layout>
