@@ -19,7 +19,7 @@ try {
     chapterInfo = infoData.data;
 
 } catch (e) {
-    console.error("Error fetching chapter pages", e);
+    console.error(e);
 }
 ---
 
@@ -36,7 +36,7 @@ try {
         <div class="w-10"></div>
     </div>
 
-    <div class="pt-16 pb-32 min-h-screen bg-[#111] flex flex-col items-center">
+    <div class="pt-16 pb-32 min-h-screen bg-[#111] flex flex-col items-center relative">
         {images.length > 0 ? (
             images.map((img, index) => (
                 <img 
@@ -54,10 +54,31 @@ try {
         )}
 
         <div class="mt-10 mb-10 flex gap-4">
-             <button onclick="alert('Use Chapter List to navigate')" class="px-6 py-3 bg-blue-600 rounded-full text-white font-bold shadow-lg hover:bg-blue-500 transition">
+             <button id="next-btn" class="px-6 py-3 bg-blue-600 rounded-full text-white font-bold shadow-lg hover:bg-blue-500 transition">
                 Next Chapter
              </button>
         </div>
     </div>
 
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-2xl border border-white/10 flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-[100]">
+        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="font-medium">Use the Chapter List to navigate for now!</span>
+    </div>
+
+    <script>
+        const btn = document.getElementById('next-btn');
+        const toast = document.getElementById('toast');
+        let timeout;
+
+        if(btn) {
+            btn.addEventListener('click', () => {
+                toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+                
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+                }, 3000);
+            });
+        }
+    </script>
 </Layout>
